@@ -11,6 +11,8 @@ from pandas.io.json import json_normalize
 import matplotlib.pyplot as plt
 import numpy as np 
 import scipy as sp
+
+
  
 atd = read_csv("A&E Daily Attendances.csv")
 
@@ -48,19 +50,23 @@ weather = weather[time]
 glasgow_and_clyde = atd["Treatment NHS Board Description - as at date of episode"].isin(["NHS GREATER GLASGOW & CLYDE"])
 
 attendances= atd[glasgow_and_clyde]
-
-attendances_mean = np.mean(pandas.to_numeric(attendances["Number Of Attendances"]))
+attendances["Number Of Attendances"]= attendances["Number Of Attendances"].apply(pandas.to_numeric)
+attendances_mean = attendances.groupby("Treatment Location Name", as_index=False)["Number Of Attendances"].mean()
 attendances["Arrival Date"] = pandas.to_datetime(attendances["Arrival Date"])
 attendances["Arrival Date"] = attendances["Arrival Date"].dt.date
-attendances["Demmand"] = "Low"
+attendances["Demmand"] = "NaN"
+demmand = attendances.Demmand.copy()
+
 
 for row in attendances.iterrows(): 
-    
-    if int(row[1][3])> attendances_mean:
-        row[1][4] = "High"
-        
+    hospital_loc = attendances_mean[attendances_mean["Treatment Location Name"] == row[1][2]]
+    hospital_mean = np.int(hospital_loc["Number Of Attendances"])
+    if (row[1][3])> hospital_mean:
+        demmand[row[0]]= "High"       
     else: 
-        row[1][4] = "Low"
+        demmand[row[0]] = "Low"
+
+attendances["Demmand"] = demmand
 print(attendances.describe()) 
 
 final_df = pandas.merge(attendances, weather, left_on="Arrival Date", right_on="dt")
