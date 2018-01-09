@@ -13,60 +13,66 @@ import numpy as np
 import scipy as sp
 
 
- 
-atd = read_csv("A&E Daily Attendances.csv")
-
-
-atd = atd.drop(atd.index[[0,1,2,3]])
-atd.columns = atd.iloc[0]
-atd = atd.drop(atd.index[[0]])
-with open('bulkweather.json') as datafile: 
+def _init_(): 
+    atd = read_csv("A&E Daily Attendances.csv")
     
-    data = json.load(datafile)
-
-weather_main = json_normalize(data)
-weather_items = json_normalize(data, "weather")
-
-
-atd.dropna()
-weather = pandas.concat([weather_main], ignore_index=False)
-weather = weather.join(weather_items,rsuffix="_y" )
-weather["dt"]= pandas.to_datetime(weather["dt"], unit="s")
-
-start_date = '2014-12-31'
-end_date = '2016-12-31'
-mask = (weather['dt'] > start_date)&(weather['dt'] <=end_date)
-weather = weather[mask]
-weather["dt"] = weather["dt"].dt.date
-
-
-time = (weather['dt_iso'].str.contains("13:00:00"))
-weather = weather[time]
-
-
     
-
-
-glasgow_and_clyde = atd["Treatment NHS Board Description - as at date of episode"].isin(["NHS GREATER GLASGOW & CLYDE"])
-
-attendances= atd[glasgow_and_clyde]
-attendances["Number Of Attendances"]= attendances["Number Of Attendances"].apply(pandas.to_numeric)
-attendances_mean = attendances.groupby("Treatment Location Name", as_index=False)["Number Of Attendances"].mean()
-attendances["Arrival Date"] = pandas.to_datetime(attendances["Arrival Date"])
-attendances["Arrival Date"] = attendances["Arrival Date"].dt.date
-attendances["Demmand"] = "NaN"
-demmand = attendances.Demmand.copy()
-
-
-for row in attendances.iterrows(): 
-    hospital_loc = attendances_mean[attendances_mean["Treatment Location Name"] == row[1][2]]
-    hospital_mean = np.int(hospital_loc["Number Of Attendances"])
-    if (row[1][3])> hospital_mean:
-        demmand[row[0]]= "High"       
-    else: 
-        demmand[row[0]] = "Low"
-
-attendances["Demmand"] = demmand
-print(attendances.describe()) 
-
-final_df = pandas.merge(attendances, weather, left_on="Arrival Date", right_on="dt")
+    atd = atd.drop(atd.index[[0,1,2,3]])
+    atd.columns = atd.iloc[0]
+    atd = atd.drop(atd.index[[0]])
+    with open('bulkweather.json') as datafile: 
+        
+        data = json.load(datafile)
+    
+    weather_main = json_normalize(data)
+    weather_items = json_normalize(data, "weather")
+    
+    
+    atd.dropna()
+    weather = pandas.concat([weather_main], ignore_index=False)
+    weather = weather.join(weather_items,rsuffix="_y" )
+    weather["dt"]= pandas.to_datetime(weather["dt"], unit="s")
+    
+    start_date = '2014-12-31'
+    end_date = '2016-12-31'
+    mask = (weather['dt'] > start_date)&(weather['dt'] <=end_date)
+    weather = weather[mask]
+    weather["dt"] = weather["dt"].dt.date
+    
+    
+    time = (weather['dt_iso'].str.contains("13:00:00"))
+    weather = weather[time]
+    
+    
+        
+    
+    
+    glasgow_and_clyde = atd["Treatment NHS Board Description - as at date of episode"].isin(["NHS GREATER GLASGOW & CLYDE"])
+    
+    attendances= atd[glasgow_and_clyde]
+    attendances["Number Of Attendances"]= attendances["Number Of Attendances"].apply(pandas.to_numeric)
+    attendances_mean = attendances.groupby("Treatment Location Name", as_index=False)["Number Of Attendances"].mean()
+    attendances["Arrival Date"] = pandas.to_datetime(attendances["Arrival Date"])
+    attendances["Arrival Date"] = attendances["Arrival Date"].dt.date
+    attendances["Demmand"] = "NaN"
+    demmand = attendances.Demmand.copy()
+    
+    
+    for row in attendances.iterrows(): 
+        hospital_loc = attendances_mean[attendances_mean["Treatment Location Name"] == row[1][2]]
+        hospital_mean = np.int(hospital_loc["Number Of Attendances"])
+        if (row[1][3])> hospital_mean:
+            demmand[row[0]]= "High"       
+        else: 
+            demmand[row[0]] = "Low"
+    
+    attendances["Demmand"] = demmand
+   
+    
+    final_df = pandas.merge(attendances, weather, left_on="Arrival Date", right_on="dt")
+    print(final_df.columns) 
+    
+    final_df= final_df.drop(["icon", "id", "city_id", "rain.1h", "rain.3h", 
+                           "Treatment NHS Board Description - as at date of episode", 
+                           "city_id", "snow.3h", "Number Of Attendances", "dt_iso", "dt"], axis=1)
+    return final_df

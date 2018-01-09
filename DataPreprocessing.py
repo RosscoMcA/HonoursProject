@@ -6,13 +6,23 @@ Created on Mon Jan  8 13:26:48 2018
 """
 
 from pandas import read_csv
+import pandas
 import matplotlib.pyplot as plt
 from sklearn import svm 
 import numpy as np
+import DataConditioning as dc
 from matplotlib import interactive
 interactive(True)
 
 
+def get_data():
+    dataset = dc._init_()
+   # dataset = set_dummies([], dataset)
+   
+    return dataset
+
+data = get_data()
+get_data()  
 def outlier_ident(x):
     q1 = np.percentile(x, 25)
     q3 = np.percentile(x, 75)
@@ -33,21 +43,8 @@ def processOutliers(data, dataset):
     return dataset
 
 
-X_Train, X_Test, Y_Train, Y_Test = train_test_split(x, y, train_size=70, random_state=1)
+#X_Train, X_Test, Y_Train, Y_Test = train_test_split(x, y, train_size=70, random_state=1)
 
-
-
-
-
-
-def dimensionality_reduction():
-
-    pca = PCA(n_components=8)
-    X_PCA = pandas.DataFrame(pca.fit_transform(data))
-    
-    print(X_PCA.head(5))
-
-#dimensionality_reduction()
 
 
 def feature_selec():
@@ -62,10 +59,12 @@ def feature_selec():
     return x_train_sel, x_test_sel
 
 
-final_train_case_x, final_test_case_x = feature_selec()
+#final_train_case_x, final_test_case_x = feature_selec()
   
     
-
+def set_dummies(dummy_Items, dataset):
+    
+    dataset = pandas.get_dummies(columns= dummy_Items)
 
 
 
