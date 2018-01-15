@@ -17,7 +17,9 @@ interactive(True)
 
 def get_data():
     dataset = dc._init_()
-   # dataset = set_dummies([], dataset)
+   
+    dataset.plot.hist(bins=20, stacked=True, figsize=(10,10))
+    '''dataset = set_dummies([], dataset)'''
    
     return dataset
 

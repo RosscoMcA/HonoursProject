@@ -13,6 +13,8 @@ import numpy as np
 import scipy as sp
 
 
+road_accidents= read_csv("accidents_day_council15_16.csv")
+glasgow_road = road_accidents[["Unnamed: 0","Glasgow City"]]
 def _init_(): 
     atd = read_csv("A&E Daily Attendances.csv")
     
@@ -32,7 +34,8 @@ def _init_():
     weather = pandas.concat([weather_main], ignore_index=False)
     weather = weather.join(weather_items,rsuffix="_y" )
     weather["dt"]= pandas.to_datetime(weather["dt"], unit="s")
-    
+    glasgow_road["Unnamed: 0"] = pandas.to_datetime(glasgow_road["Unnamed: 0"])
+    glasgow_road["Unnamed: 0"] = glasgow_road["Unnamed: 0"].dt.date
     start_date = '2014-12-31'
     end_date = '2016-12-31'
     mask = (weather['dt'] > start_date)&(weather['dt'] <=end_date)
@@ -70,9 +73,14 @@ def _init_():
    
     
     final_df = pandas.merge(attendances, weather, left_on="Arrival Date", right_on="dt")
+    final_df = pandas.merge(final_df, glasgow_road, left_on="dt", right_on="Unnamed: 0")
     print(final_df.columns) 
     
-    final_df= final_df.drop(["icon", "id", "city_id", "rain.1h", "rain.3h", 
+    final_df= final_df.drop(["icon", "id", "city_id", "rain.1h", "rain.3h","rain.24h", "rain.today", 
                            "Treatment NHS Board Description - as at date of episode", 
-                           "city_id", "snow.3h", "Number Of Attendances", "dt_iso", "dt"], axis=1)
+                           "city_id", "snow.3h", "Number Of Attendances", "dt_iso", "dt", "weather", "Unnamed: 0"], axis=1)
+    
+    final_df.rename(columns={"Glasgow City": "Road_Accident"}, inplace=True)
     return final_df
+
+value = _init_()
