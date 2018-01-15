@@ -78,7 +78,7 @@ def _init_():
     
     final_df= final_df.drop(["icon", "id", "city_id", "rain.1h", "rain.3h","rain.24h", "rain.today", 
                            "Treatment NHS Board Description - as at date of episode", 
-                           "city_id", "snow.3h", "Number Of Attendances", "dt_iso", "dt", "weather", "Unnamed: 0"], axis=1)
+                           "city_id", "snow.3h", "Number Of Attendances", "Arrival Date", "dt_iso", "weather", "Unnamed: 0", "main"], axis=1)
     
     final_df.rename(columns={"Glasgow City": "Road_Accident"}, inplace=True)
     return final_df
