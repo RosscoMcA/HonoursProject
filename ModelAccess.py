@@ -11,7 +11,7 @@ from sklearn import svm
 class modelAccess : 
     
     def __init__():
-        this.classifier = joblib.load("A&EModel")
+        classifier = joblib.load("A&EModel")
     
     def prediction(inputData):
         

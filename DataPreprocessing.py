@@ -94,7 +94,7 @@ def get_data():
     x["wind.speed"] = processOutliers(x["wind.speed"], x)
 
    
-    X_Train, X_Test, Y_Train, Y_Test = train_test_split(x, y, train_size=0.75, random_state=2)
+    X_Train, X_Test, Y_Train, Y_Test = train_test_split(x, y, train_size=0.9, random_state=2)
     final_train_case_x, final_test_case_x = feature_selec(X_Train, Y_Train, X_Test, x)
     return  final_train_case_x, final_test_case_x ,Y_Train, Y_Test
 
