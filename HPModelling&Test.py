@@ -15,18 +15,18 @@ import DataPreprocessing as data_pre
 from sklearn.externals import joblib
 
 
-x,y, test_x, test_y = data_pre.get_data()
+x,test_x,y, test_y = data_pre.get_data()
 
 def create_model():
     
     
     print("Creating the model")
-    classifier = svm.SVC(C=1, kernel="rbf")
+    classifier = svm.NuSVC(kernel="rbf")
     
     classifier.fit(x, y)
     print("Model is built")
     
-    model_per = joblib.dump(classifier, "A&EModel")
+    joblib.dump(classifier, "A&EModel")
     
     
     
@@ -42,8 +42,8 @@ def test_Model(prediction_model):
     
     
     print("Results of prediction are: ")
-    print("%s of %s values correct." % (correct_total, len(Y_Test)))
-    print("an Accuracy of %s" %((correct_total/len(Y_Test))*100))
+    print("%s of %s values correct." % (correct_total, len(test_y)))
+    print("an Accuracy of %s" %((correct_total/len(test_y))*100))
 
 create_model()
     
