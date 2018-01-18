@@ -83,7 +83,7 @@ def get_data():
     
     
     
- 
+    '''
     x["clouds.all"] = processOutliers(x["clouds.all"], x)
     x["main.humidity"] = processOutliers(x["main.humidity"], x)
     x["main.pressure"] = processOutliers(x["main.pressure"], x)
@@ -92,6 +92,7 @@ def get_data():
     x["main.temp_min"] = processOutliers(x["main.temp_min"], x)
     x["wind.deg"] = processOutliers(x["wind.deg"], x)
     x["wind.speed"] = processOutliers(x["wind.speed"], x)
+    '''
 
    
     X_Train, X_Test, Y_Train, Y_Test = train_test_split(x, y, train_size=0.9, random_state=2)

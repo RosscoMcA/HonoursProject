@@ -10,10 +10,13 @@ from sklearn import svm
 
 class modelAccess : 
     
-    def __init__():
-        classifier = joblib.load("A&EModel")
+    
+    
+   
     
     def prediction(inputData):
+        
+        clf = joblib.load("A&EModel")
         
         result = clf.predict(inputData)
         

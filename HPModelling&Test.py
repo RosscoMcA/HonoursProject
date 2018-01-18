@@ -21,7 +21,7 @@ def create_model():
     
     
     print("Creating the model")
-    classifier = svm.NuSVC(gamma=0.0001, kernel="sigmoid")
+    classifier = svm.NuSVC(gamma=0.0001)
     
     classifier.fit(x, y)
     print("Model is built")
