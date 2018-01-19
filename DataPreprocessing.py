@@ -22,7 +22,7 @@ interactive(True)
 def set_dummies(dataset):
     
     dataset = pandas.get_dummies(dataset)
-    
+    dataset.to_csv("Dummy_model")
     return dataset
     
 

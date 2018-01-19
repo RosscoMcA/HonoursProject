@@ -18,28 +18,14 @@ class UserInterface:
         root = tk.Tk()
         frame = tk.Frame(root)
         frame.pack()
-        data =[75	,53,	65,	1005,	281.15,	281.15,	281.15,	290,	4,	0,	0,	0,	0,	1,	0,	0,	0,	0,	0,	1,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0]
+        
 
         
         value = self.prediction(data)
         tk.Label(frame, text= value, font=('bold')).pack()
         
         root.mainloop()
-        '''
-         tv = ttk.Treeview(frame)
-        tv['columns']=('IName','IWeight', 'ICost')
-        tv.heading('IName', text='Name')
-        tv.column('IName', width=100)
-        tv.heading('IWeight', text='Weight')
-        tv.column('IWeight', width=100)
-        tv.heading('ICost', text= 'Cost')
-        tv.column('ICost', width=100)
-        tv.grid(row=1, column=2, sticky=(tk.N, tk.S, tk.E, tk.W))
-
-        xs = ttk.Scrollbar(frame, orient=tk.HORIZONTAL, command=tv.xview)
-        tv["xscrollcommand"] = xs.set
-        xs.grid(row=1, column=2, sticky=(tk.E, tk.W))
-        '''
+       
     
        
         
