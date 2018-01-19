@@ -6,6 +6,7 @@ Created on Fri Jan 19 19:19:58 2018
 """
 import pandas 
 from pandas import read_csv
+import numpy as np 
 class department:
     
     def get_department_dummies(option, repition):
@@ -20,8 +21,19 @@ class department:
         data = data.reindex(columns=dummy.columns, fill_value=0)
         
         data =data.append([data]*(repition-1), ignore_index=True)
+        data = data.loc[:,["Treatement Location Name_GLASGOW ROYAL INFIRMARY", 
+                    "Treatment Location Name_INVERCLYDE ROYAL HOSPITAL", 
+                    "Treatment Location Name_NEW VICTORIA HOSPITAL", 
+                    "Treatment Location Name_QUEEN ELIZABETH UNIVERSITY HOSPITAL", 
+                    "Treatment Location Name_ROYAL ALEXANDRIA HOSPITAL", 
+                    "Treatment Location Name_ROYAL HOSPITAL FOR CHILDREN", 
+                    "Treatment Location Name_STOBHILL HOSPITAL", 
+                    "Treatment Location Name_VALE OF LEVEN GENERAL HOSPITAL", 
+                    "Treatment Location Name_WEST GLASGOW"]]
+        
+        data=  data.replace(np.NaN, 0)
         return data
         
     
-data = department.get_department_dummies("INVERCLYDE ROYAL HOSPITAL", 14)        
+      
         
