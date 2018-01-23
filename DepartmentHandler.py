@@ -21,7 +21,7 @@ class department:
         data = data.reindex(columns=dummy.columns, fill_value=0)
         
         data =data.append([data]*(repition-1), ignore_index=True)
-        data = data.loc[:,["Treatement Location Name_GLASGOW ROYAL INFIRMARY", 
+        data = data.loc[:,["Treatment Location Name_GLASGOW ROYAL INFIRMARY", 
                     "Treatment Location Name_INVERCLYDE ROYAL HOSPITAL", 
                     "Treatment Location Name_NEW VICTORIA HOSPITAL", 
                     "Treatment Location Name_QUEEN ELIZABETH UNIVERSITY HOSPITAL", 

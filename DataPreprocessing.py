@@ -55,7 +55,9 @@ def processOutliers(data, dataset):
 
 
 
-def feature_selec(X_Train, Y_Train, X_Test, x):
+def feature_selec(X_Train, Y_Train, X_Test, x, number=None):
+    
+        
     select = sklearn.feature_selection.SelectPercentile(percentile=80)
     select_feature = select.fit(X_Train, Y_Train)
     indic_sel = select_feature.get_support(indices=True)

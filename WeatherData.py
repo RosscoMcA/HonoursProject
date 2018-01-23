@@ -26,15 +26,20 @@ class weather_data:
         return self.pre_process_data(location)
         
     def pre_process_data(self, location):
-        dummy = read_csv("dummy_model")
+        
         weather = self.pull_weather_data(location)
         
-        weather = weather.drop(["snow", "temp", "weather", "rain", "icon", 
+        weather = weather.drop(["temp", "weather", "rain", "icon", 
                                 "id","main", "eve", "morn", "night"], axis=1)
         
         weather["humidity"] = weather["humidity"].replace(np.NaN, 0)
         weather = pandas.get_dummies(weather)
-        weather.reindex(columns=dummy.columns, fill_value=0)
+          
+        weather = weather.rename(columns={"clouds": "clouds.all","humidity": "main.humidity",
+                                          "pressure": "main.pressure", "speed": "wind.speed",
+                                          "deg": "wind.deg", "day": "main.temp", "max":"main.temp_max",
+                                          "min":"main.temp_min"})
+        
         return weather
         
         
@@ -57,7 +62,8 @@ class weather_data:
         return final
        
 
-
+wd = weather_data()
+da = wd.get_data()
 
 
 

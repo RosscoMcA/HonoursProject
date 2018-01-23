@@ -10,15 +10,15 @@ from sklearn import svm
 
 class modelAccess : 
     
+    def __init__(self): 
+        self.clf = joblib.load("A&EModel")
     
+    def get_model(self):
+        return self.clf
     
-   
-    
-    def prediction(inputData):
+    def prediction(self, inputData):
         
-        clf = joblib.load("A&EModel")
-        
-        result = clf.predict(inputData)
+        result = self.clf.predict(inputData)
         
         if(result == 1):
             return "High Demmand"
