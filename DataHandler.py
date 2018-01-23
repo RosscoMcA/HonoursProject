@@ -27,7 +27,8 @@ class data_interface:
         dataset = dataset.reindex(columns=dummy.columns, fill_value=0)
         
         dataset["dt"]= pd.to_datetime(dataset["dt"], unit="s").dt.date
-        dataset["dt"] = pd.to_datetime(dataset["dt"]).dt.dayofyear
+        dataset["dt"] = pd.to_datetime(dataset["dt"])
+        dataset["dt"]= dataset["dt"].apply(lambda x: x.toordinal())
        
         dataset = dataset.dropna()
         dataset = dataset.drop(["Unnamed: 0", "Road_Accident", 

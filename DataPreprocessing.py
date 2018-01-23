@@ -78,7 +78,9 @@ def get_data():
     #dataset.plot.hist(by=dataset.Demmand, figsize=(25,10), stacked= True )
     y = dataset["Demmand"]
     x = dataset.drop("Demmand", 1)
-    x["dt"] = pandas.to_datetime(x["dt"]).dt.dayofyear
+    x["dt"] = pandas.to_datetime(x["dt"])
+    
+    x["dt"]= x["dt"].apply(lambda x: x.toordinal())
     x = set_dummies(x)
     y = y.replace("High", 1)
     y = y.replace("Low", 0)
