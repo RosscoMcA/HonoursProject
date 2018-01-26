@@ -13,6 +13,7 @@ import tkinter.ttk as tkk
 import datetime as date
 
 
+
 class UserInterface: 
     
     def __init__(self):
@@ -22,10 +23,61 @@ class UserInterface:
     def main_page(self):
         root = tk.Tk()
         frame = tk.Frame(root)
-        frame.pack()
+        frame.grid()
         
 
-        self.dataframe = self.culminate_data("ROYAL ALEXANDRA HOSPITAL")
+        
+        
+        def refresh_section(hospital):
+            
+            self.results = self.get_result_data(value=hospital)
+            var = tk.StringVar()
+            var.set("Displaying estimated demands for "+hospital)
+            tk.Label(frame, textvariable=var).grid(row=0)
+            Tv= tkk.Treeview(frame)
+            Tv["columns"]= ("Date", "Demmand")
+            Tv.heading("Date", text="Date of Prediction")
+            Tv.column("Date", width=150)
+            Tv.heading("Demmand", text="Potential Demmand Level")
+            Tv.column("Demmand", width=200)
+            
+            Tv.grid(row=2, sticky=(tk.N, tk.S, tk.E, tk.W))
+            
+            for single in self.results:
+                Tv.insert("", "end", text="", values=(single[0], single[1]))
+                
+            
+        refresh_section("ROYAL ALEXANDRA HOSPITAL")   
+         
+        self.select_case = tk.StringVar()
+        self.hospital = tkk.Combobox(frame, textvariable=self.select_case, state="readonly")
+ 
+        self.hospital["values"] = ("ROYAL ALEXANDRA HOSPITAL",
+                         "INVERCLYDE ROYAL HOSPITAL", "GLASGOW ROYAL INFIRMARY", 
+                         "NEW VICTORIA HOSPITAL", 
+                         "QUEEN ELIZABETH UNIVERSITY HOSPITAL", 
+                         "ROYAL HOSPITAL FOR CHILDREN", 
+                         "STOBHILL HOSPITAL", 
+                         "VALE OF LEVEN GENERAL HOSPITAL", 
+                         "WEST GLASGOW")
+        self.hospital.grid(row=1, column= 0)
+        
+        
+        
+        btnPredict = tk.Button(frame, text="Submit", command=lambda: refresh_section(hospital=str(self.select_case.get())))
+        btnPredict.grid(row=1, column=1)
+        root.mainloop()
+        
+        
+            
+            
+            
+    def get_result_data(self, value=None):
+        
+        if value == None:
+            return None
+        
+        self.dataframe = self.culminate_data(value)
         
         self.dataframe = self.dataframe.values
         results= []
@@ -33,25 +85,7 @@ class UserInterface:
             dt = date.date.fromordinal(int(item[1]))
             value = self.prediction(item)
             results.append([dt,value])
-            
-        self.results = results
-        
-        Tv= tkk.Treeview(frame)
-        Tv["columns"]= ("Date", "Demmand")
-        Tv.heading("Date", text="Date of Prediction")
-        Tv.column("Date", width=150)
-        Tv.heading("Demmand", text="Potential Demmand Level")
-        Tv.column("Demmand", width=200)
-        
-        Tv.grid(row=1, column=2, sticky=(tk.N, tk.S, tk.E, tk.W))
-        
-        for single in results:
-            Tv.insert("", "end", text="", values=(single[0], single[1]))
-        root.mainloop()
-       
-    def get_result_data(self):
-        return self.results
-       
+        return results
     def culminate_data(self, department):    
         data_inter = data_interface(department)
         
