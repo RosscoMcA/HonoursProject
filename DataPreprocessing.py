@@ -10,6 +10,7 @@ import pandas
 import matplotlib.pyplot as plt
 import numpy as np
 import DataConditioning as dc
+import test_conditioning 
 from matplotlib import interactive
 from sklearn.cross_validation import train_test_split
 from sklearn.decomposition import PCA
@@ -19,14 +20,19 @@ from datetime import datetime
 interactive(True)
 
 
-def set_dummies(dataset):
+def set_dummies(dataset, case=None):
+    if(case!= None):
+        
+        dataset = pandas.get_dummies(dataset, columns=case)
     
-    dataset = pandas.get_dummies(dataset)
-    dataset.to_csv("Dummy_model")
+    else :
+        dataset = pandas.get_dummies(dataset)
+    
     return dataset
     
 
-
+def set_reference_model(dataset):
+    dataset.to_csv("Dummy_model")
 
 
 def outlier_ident(x):
@@ -64,26 +70,110 @@ def feature_selec(X_Train, Y_Train, X_Test, x, number=None):
     colnames_select = [x.columns[i] for i in indic_sel]
     
     x_train_sel = X_Train[colnames_select]
+    if(X_Test is None):
+    
+        return x_train_sel
+    
     x_test_sel = X_Test[colnames_select]
     
     return x_train_sel, x_test_sel
 
-
 #
-  
-def get_data():
-    dataset = dc._init_()
+
+def get_data_tester():
+    
+    dataset = test_conditioning.data
+    
+    classify = pandas.DataFrame()
+    classify["Demmand"] = dataset["Demmand"]
+    classify["Location Name"] = dataset["Location Name"]
+    classify["dt"] = dataset["dt"]
+    classify = classify.replace("High", 1)
+    classify = classify.replace("Low", 0)
+    classify = classify.groupby([dataset["Location Name"], dataset["dt"] ]).median().reset_index()
+    
+
+    dataset = dataset.drop("Demmand", 1)
+    dataset = set_dummies(dataset, ["description"])
+    
+    
+    
+    
+    dataset =dataset.groupby([dataset["Location Name"], dataset["dt"] ]).median().reset_index()
+    dataset = dataset.rename(columns={"Location Name": "Treatment Location Name"})
+    dataset = set_dummies(dataset, ["Treatment Location Name"])
+    dataset = dataset.join(classify, rsuffix="_y")
+    dataset = dataset.reset_index()
+    dataset=  dataset.drop_duplicates()
+    dataset = dataset.drop(["Location Name", "dt_y", "index"], 1)
+    
+    
    
+    y = dataset["Demmand"]
+    
+    dataset = dataset.drop("Demmand", 1)
+    
+    
+    x = dataset
+    x["dt"] = pandas.to_datetime(x["dt"])
+    x["day"]= x["dt"].apply(lambda x: int(x.day))
+    x["month"] = x["dt"].apply(lambda x: int(x.month))
+    
+    x=  x.drop("dt", 1)
+    
+
+    dummy = read_csv("dummy_model")
+    
+    final_test_case_x = x.reindex(columns=dummy.columns, fill_value=0)
+    final_test_case_x = final_test_case_x.drop(["Unnamed: 0"], 1)
+    return  final_test_case_x, y
+  
+    
+
+
+def get_data_builder():
+    
+    dataset = dc._init_()
+    
+    classify = pandas.DataFrame()
+    classify["Demmand"] = dataset["Demmand"]
+    classify["Treatment Location Name"] = dataset["Treatment Location Name"]
+    classify["dt"] = dataset["dt"]
+    classify = classify.replace("High", 1)
+    classify = classify.replace("Low", 0)
+    classify = classify.groupby([dataset["Treatment Location Name"], dataset["dt"] ]).median().reset_index()
+    
+
+    dataset = dataset.drop("Demmand", 1)
+    dataset = set_dummies(dataset, ["description"])
+    
+    
+    
+    
+    dataset =dataset.groupby([dataset["Treatment Location Name"], dataset["dt"] ]).median().reset_index()
+    dataset = set_dummies(dataset, ["Treatment Location Name"])
+    dataset = dataset.join(classify, rsuffix="_y")
+    dataset = dataset.reset_index()
+    dataset=  dataset.drop_duplicates()
+    dataset = dataset.drop(["Treatment Location Name", "dt_y", "index"], 1)
+    
+    
+    
     #dataset.plot.hist(bins=20, stacked=True, figsize=(10,10))
     #dataset.plot.hist(by=dataset.Demmand, figsize=(25,10), stacked= True )
     y = dataset["Demmand"]
-    x = dataset.drop("Demmand", 1)
-    x["dt"] = pandas.to_datetime(x["dt"])
     
-    x["dt"]= x["dt"].apply(lambda x: x.toordinal())
-    x = set_dummies(x)
-    y = y.replace("High", 1)
-    y = y.replace("Low", 0)
+    dataset = dataset.drop("Demmand", 1)
+    
+    
+    x = dataset
+    x["dt"] = pandas.to_datetime(x["dt"])
+    x["day"]= x["dt"].apply(lambda x: int(x.day))
+    x["month"] = x["dt"].apply(lambda x: int(x.month))
+    
+    x=  x.drop("dt", 1)
+    
+    
     
     
     
@@ -101,9 +191,11 @@ def get_data():
    
     X_Train, X_Test, Y_Train, Y_Test = train_test_split(x, y, train_size=0.9, random_state=2)
     final_train_case_x, final_test_case_x = feature_selec(X_Train, Y_Train, X_Test, x)
+    set_reference_model(final_train_case_x)
     return  final_train_case_x, final_test_case_x ,Y_Train, Y_Test
+    
 
-data = get_data()
+data = get_data_tester()
     
 
 

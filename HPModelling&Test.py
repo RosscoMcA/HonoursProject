@@ -15,13 +15,14 @@ import DataPreprocessing as data_pre
 from sklearn.externals import joblib
 
 
-x,test_x,y, test_y = data_pre.get_data()
+x,test_x,y, test_y = data_pre.get_data_builder()
+predict_x, predict_y = data_pre.data
 
 def create_model():
     
     
     print("Creating the model")
-    classifier = svm.NuSVC(gamma=0.0001)
+    classifier = svm.NuSVC(gamma=0.001, kernel="linear")
     
     classifier.fit(x, y)
     print("Model is built")
@@ -30,11 +31,11 @@ def create_model():
     
     
     
-    test_Model(classifier)
+    assess_Model(classifier)
     
     
 
-def test_Model(prediction_model):
+def assess_Model(prediction_model):
     #For every test item assess the result and display a correct 
     # total and accuracy percentage
     predict_results = [int(a) for a in prediction_model.predict(test_x)]
@@ -44,6 +45,17 @@ def test_Model(prediction_model):
     print("Results of prediction are: ")
     print("%s of %s values correct." % (correct_total, len(test_y)))
     print("an Accuracy of %s" %((correct_total/len(test_y))*100))
+    
+    test_model(prediction_model)
+
+def test_model(prediction_model):
+    predict_results = [int(a) for a in prediction_model.predict(predict_x)]
+    correct_total = sum(int(a==y) for a, y in zip(predict_results, predict_y))
+    
+    
+    print("Results of test are: ")
+    print("%s of %s values correct." % (correct_total, len(predict_y)))
+    print("an Accuracy of %s" %((correct_total/len(predict_y))*100))
 
 create_model()
     
