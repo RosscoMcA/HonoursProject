@@ -14,7 +14,7 @@ import scipy as sp
 
 class test_conditioning:
     
-    def _init_():
+    def load(self):
         accidents= read_csv("A&E Daily Attendances - 2017.csv")
         
         
@@ -79,4 +79,5 @@ class test_conditioning:
         
         return final_df
 
-data = test_conditioning._init_()
+test = test_conditioning()
+data = test.load()

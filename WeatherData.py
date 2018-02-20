@@ -5,7 +5,7 @@ Created on Wed Jan 17 19:31:09 2018
 @author: Ross
 """
 
-import pyowm
+import pyowm as pyowm
 import requests 
 import pandas
 import numpy as np

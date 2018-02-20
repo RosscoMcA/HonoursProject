@@ -7,12 +7,21 @@ Created on Wed Jan 17 17:43:31 2018
 from ModelAccess import modelAccess as ma
 import pandas as pd
 import numpy as np
-import tkinter as tk
+
+    
+    
 from DataHandler import data_interface
-import tkinter.ttk as tkk
+
 import datetime as date
 
-
+try:
+    import tkinter as tk
+    import tkinter.ttk as tkk
+    
+except: 
+    import Tkinter as tk
+    import ttk as tkk
+    
 
 class UserInterface: 
     
@@ -26,12 +35,12 @@ class UserInterface:
         frame.grid()
         
 
-        
+        var = tk.StringVar()
         
         def refresh_section(hospital):
-            
+            var.set("")
             self.results = self.get_result_data(value=hospital)
-            var = tk.StringVar()
+            
             var.set("Displaying estimated demands for "+hospital)
             tk.Label(frame, textvariable=var).grid(row=0)
             Tv= tkk.Treeview(frame)
@@ -79,19 +88,21 @@ class UserInterface:
         
         self.dataframe = self.culminate_data(value)
         
-        self.dataframe = self.dataframe.values
+        
         results= []
-        for item in self.dataframe: 
-            dt = date.date.fromordinal(int(item[1]))
+        for index, item in self.dataframe.iterrows(): 
+            dt = str(int(item["month"])) + "/"+ str(int(item["day"]))
+            item = item.reshape(1, -1)
             value = self.prediction(item)
             results.append([dt,value])
         return results
+    
     def culminate_data(self, department):    
         data_inter = data_interface(department)
         
         data = data_inter.get_data()
         
-        data["clouds.all"] = [float(x) for x in data["clouds.all"]]
+        
         
       
         

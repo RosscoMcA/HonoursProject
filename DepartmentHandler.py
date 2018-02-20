@@ -9,7 +9,7 @@ from pandas import read_csv
 import numpy as np 
 class department:
     
-    def get_department_dummies(option, repition):
+    def get_department_dummies(self, option, repition):
         values = {"Treatment Location Name": [option]}
         
         data = pandas.DataFrame(values)
