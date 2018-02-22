@@ -16,13 +16,13 @@ from sklearn.externals import joblib
 
 
 x,test_x,y, test_y = data_pre.get_data_builder()
-predict_x, predict_y = data_pre.data
+
 
 def create_model():
     
     
     print("Creating the model")
-    classifier = svm.NuSVC(gamma=0.001, kernel="linear")
+    classifier = svm.NuSVC(gamma=0.001, kernel="rbf")
     
     classifier.fit(x, y)
     print("Model is built")
@@ -44,9 +44,9 @@ def assess_Model(prediction_model):
     
     print("Results of prediction are: ")
     print("%s of %s values correct." % (correct_total, len(test_y)))
-    print("an Accuracy of %s" %((correct_total/len(test_y))*100))
+    print("an Accuracy of %s" *((correct_total/len(test_y))*100))
     
-    test_model(prediction_model)
+    #test_model(prediction_model)
 
 def test_model(prediction_model):
     predict_results = [int(a) for a in prediction_model.predict(predict_x)]

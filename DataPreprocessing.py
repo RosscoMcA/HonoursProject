@@ -64,7 +64,7 @@ def processOutliers(data, dataset):
 def feature_selec(X_Train, Y_Train, X_Test, x, number=None):
     
         
-    select = sklearn.feature_selection.SelectPercentile(percentile=80)
+    select = sklearn.feature_selection.SelectPercentage()
     select_feature = select.fit(X_Train, Y_Train)
     indic_sel = select_feature.get_support(indices=True)
     colnames_select = [x.columns[i] for i in indic_sel]
@@ -115,18 +115,14 @@ def get_data_tester():
     
     
     x = dataset
-    x["dt"] = pandas.to_datetime(x["dt"])
-    x["day"]= x["dt"].apply(lambda x: int(x.day))
-    x["month"] = x["dt"].apply(lambda x: int(x.month))
     
-    x=  x.drop("dt", 1)
     
 
-    dummy = read_csv("dummy_model")
+   
     
-    final_test_case_x = x.reindex(columns=dummy.columns, fill_value=0)
-    final_test_case_x = final_test_case_x.drop(["Unnamed: 0"], 1)
-    return  final_test_case_x, y
+    final_test_case_x = x
+    
+    return final_test_case_x, y
   
     
 
@@ -143,6 +139,7 @@ def get_data_builder():
     classify = classify.replace("Low", 0)
     classify = classify.groupby([dataset["Treatment Location Name"], dataset["dt"] ]).median().reset_index()
     
+    
 
     dataset = dataset.drop("Demmand", 1)
     dataset = set_dummies(dataset, ["description"])
@@ -157,21 +154,24 @@ def get_data_builder():
     dataset=  dataset.drop_duplicates()
     dataset = dataset.drop(["Treatment Location Name", "dt_y", "index"], 1)
     
-    
+    test_set, test_y = get_data_tester()
     
     #dataset.plot.hist(bins=20, stacked=True, figsize=(10,10))
     #dataset.plot.hist(by=dataset.Demmand, figsize=(25,10), stacked= True )
-    y = dataset["Demmand"]
+    
+    y_entries = [test_y, dataset["Demmand"]]
+    y = pandas.concat(y_entries, ignore_index=True)
     
     dataset = dataset.drop("Demmand", 1)
     
     
-    x = dataset
+    x = pandas.concat([test_set, dataset], ignore_index=True)
     x["dt"] = pandas.to_datetime(x["dt"])
     x["day"]= x["dt"].apply(lambda x: int(x.day))
     x["month"] = x["dt"].apply(lambda x: int(x.month))
     
     x=  x.drop("dt", 1)
+   
     
     
     
@@ -188,14 +188,15 @@ def get_data_builder():
     x["wind.speed"] = processOutliers(x["wind.speed"], x)
     '''
 
-   
-    X_Train, X_Test, Y_Train, Y_Test = train_test_split(x, y, train_size=0.9, random_state=2)
+    x= x.replace(np.NaN, 0)
+    X_Train, X_Test, Y_Train, Y_Test = train_test_split(x, y, train_size=0.8, random_state=2)
     final_train_case_x, final_test_case_x = feature_selec(X_Train, Y_Train, X_Test, x)
+    
     set_reference_model(final_train_case_x)
     return  final_train_case_x, final_test_case_x ,Y_Train, Y_Test
     
 
-data = get_data_tester()
+data = get_data_builder()
     
 
 
