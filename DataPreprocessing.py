@@ -64,7 +64,7 @@ def processOutliers(data, dataset):
 def feature_selec(X_Train, Y_Train, X_Test, x, number=None):
     
         
-    select = sklearn.feature_selection.SelectPercentage()
+    select = sklearn.feature_selection.SelectPercentile(percentile=70)
     select_feature = select.fit(X_Train, Y_Train)
     indic_sel = select_feature.get_support(indices=True)
     colnames_select = [x.columns[i] for i in indic_sel]
@@ -95,6 +95,7 @@ def get_data_tester():
 
     dataset = dataset.drop("Demmand", 1)
     dataset = set_dummies(dataset, ["description"])
+    
     
     
     
@@ -141,6 +142,7 @@ def get_data_builder():
     
     
 
+
     dataset = dataset.drop("Demmand", 1)
     dataset = set_dummies(dataset, ["description"])
     
@@ -148,11 +150,21 @@ def get_data_builder():
     
     
     dataset =dataset.groupby([dataset["Treatment Location Name"], dataset["dt"] ]).median().reset_index()
-    dataset = set_dummies(dataset, ["Treatment Location Name"])
+    
+    
+    
+    
+    
+    
     dataset = dataset.join(classify, rsuffix="_y")
     dataset = dataset.reset_index()
     dataset=  dataset.drop_duplicates()
-    dataset = dataset.drop(["Treatment Location Name", "dt_y", "index"], 1)
+    dataset = dataset.drop([ "dt_y", "index"], 1)
+    
+    
+   
+  
+    
     
     test_set, test_y = get_data_tester()
     
@@ -170,11 +182,19 @@ def get_data_builder():
     x["day"]= x["dt"].apply(lambda x: int(x.day))
     x["month"] = x["dt"].apply(lambda x: int(x.month))
     
-    x=  x.drop("dt", 1)
-   
+    
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("GLASGOW ROYAL INFIRMARY", 1)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("INVERCLYDE ROYAL HOSPITAL", 2)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("NEW VICTORIA HOSPITAL", 3)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("QUEEN ELIZABETH UNIVERSITY HOSPITAL", 4)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("ROYAL ALEXANDRA HOSPITAL", 5)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("ROYAL HOSPITAL FOR CHILDREN", 6)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("STOBHILL HOSPITAL", 7)
+    
+    x=  x.drop(["dt", ], 1)
     
     
-    
+    return x
     
     
     '''
