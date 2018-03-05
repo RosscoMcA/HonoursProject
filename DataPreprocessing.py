@@ -15,6 +15,7 @@ from matplotlib import interactive
 from sklearn.cross_validation import train_test_split
 from sklearn.decomposition import PCA
 import sklearn.feature_selection
+from sklearn import preprocessing
 from datetime import datetime
 
 interactive(True)
@@ -57,14 +58,22 @@ def processOutliers(data, dataset):
     return dataset
 
 
-
+def select_from_model(train_x, test_x, classifier):
+    select = sklearn.feature_selection.SelectFromModel(classifier, prefit=True)
+    X_Train_Results = select.transform(train_x)
+    X_Test_Results = select.transform(test_x)
+    
+    
+    
+    return X_Train_Results, X_Test_Results
+   
 
 
 
 def feature_selec(X_Train, Y_Train, X_Test, x, number=None):
     
         
-    select = sklearn.feature_selection.SelectPercentile(percentile=70)
+    select = sklearn.feature_selection.SelectPercentile(percentile=80)
     select_feature = select.fit(X_Train, Y_Train)
     indic_sel = select_feature.get_support(indices=True)
     colnames_select = [x.columns[i] for i in indic_sel]
@@ -78,7 +87,13 @@ def feature_selec(X_Train, Y_Train, X_Test, x, number=None):
     
     return x_train_sel, x_test_sel
 
-#
+
+def dimensionality_reduction(data):
+
+    pca = PCA(n_components=12)
+    X_PCA = pandas.DataFrame(pca.fit_transform(data))
+
+    return X_PCA
 
 def get_data_tester():
     
@@ -94,36 +109,69 @@ def get_data_tester():
     
 
     dataset = dataset.drop("Demmand", 1)
+    
+    
+    '''
+    label_encoder = preprocessing.LabelEncoder()
+    
+    label_encoder.fit(dataset["description"])
+    
+    dataset["description"] = label_encoder.transform(dataset["description"])
+    '''
     dataset = set_dummies(dataset, ["description"])
-    
-    
-    
-    
-    
+     
+     
+     
+     
     dataset =dataset.groupby([dataset["Location Name"], dataset["dt"] ]).median().reset_index()
+    dataset = set_dummies(dataset, ["Location Name"])
     dataset = dataset.rename(columns={"Location Name": "Treatment Location Name"})
-    dataset = set_dummies(dataset, ["Treatment Location Name"])
+    
     dataset = dataset.join(classify, rsuffix="_y")
     dataset = dataset.reset_index()
     dataset=  dataset.drop_duplicates()
     dataset = dataset.drop(["Location Name", "dt_y", "index"], 1)
     
-    
+   
    
     y = dataset["Demmand"]
     
     dataset = dataset.drop("Demmand", 1)
     
     
-    x = dataset
+  
+    
+    x= dataset
+    
+    x["dt"] = pandas.to_datetime(x["dt"])
+    x["day"]= x["dt"].apply(lambda x: int(x.day))
+    x["month"] = x["dt"].apply(lambda x: int(x.month))
+    
+    '''
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("GLASGOW ROYAL INFIRMARY", 1)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("INVERCLYDE ROYAL HOSPITAL", 2)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("NEW VICTORIA HOSPITAL", 3)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("QUEEN ELIZABETH UNIVERSITY HOSPITAL", 4)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("ROYAL ALEXANDRA HOSPITAL", 5)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("ROYAL HOSPITAL FOR CHILDREN", 6)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("STOBHILL HOSPITAL", 7)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("VALE OF LEVEN GENERAL HOSPITAL", 8)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("WEST GLASGOW", 9)
+    '''
+    x= x.drop(["dt"], 1)
+    
+    
     
     
 
    
     
-    final_test_case_x = x
-    
-    return final_test_case_x, y
+    dummy = read_csv("dummy_model")
+  
+    final_test_case_x = x.reindex(columns=dummy.columns, fill_value=0)
+
+    final_test_case_x = final_test_case_x.drop(["Unnamed: 0"], 1)
+    return  final_test_case_x, y
   
     
 
@@ -138,18 +186,35 @@ def get_data_builder():
     classify["dt"] = dataset["dt"]
     classify = classify.replace("High", 1)
     classify = classify.replace("Low", 0)
-    classify = classify.groupby([dataset["Treatment Location Name"], dataset["dt"] ]).median().reset_index()
+    classify = classify.groupby([dataset["Treatment Location Name"], dataset["dt"] ]).median().reset_index(drop=True)
     
+    test_set, test_y = get_data_tester()
     
 
-
+    y_entries = [test_y, dataset["Demmand"]]
+    y = pandas.concat(y_entries, ignore_index=True).reset_index(drop=True)
+    
+    
     dataset = dataset.drop("Demmand", 1)
+    
+    '''
+    label_encoder = preprocessing.LabelEncoder()
+    
+    label_encoder.fit(dataset["description"])
+    
+    dataset["description"] = label_encoder.transform(dataset["description"])
+    '''
+    
+     
+    x = pandas.concat([test_set, dataset], ignore_index=True).reset_index(drop=True)
+    
     dataset = set_dummies(dataset, ["description"])
-    
-    
-    
-    
+     
+     
+     
+     
     dataset =dataset.groupby([dataset["Treatment Location Name"], dataset["dt"] ]).median().reset_index()
+    dataset = set_dummies(dataset, ["Treatment Location Name"])
     
     
     
@@ -157,32 +222,38 @@ def get_data_builder():
     
     
     dataset = dataset.join(classify, rsuffix="_y")
-    dataset = dataset.reset_index()
+    
     dataset=  dataset.drop_duplicates()
-    dataset = dataset.drop([ "dt_y", "index"], 1)
+
     
     
    
   
     
-    
-    test_set, test_y = get_data_tester()
-    
     #dataset.plot.hist(bins=20, stacked=True, figsize=(10,10))
     #dataset.plot.hist(by=dataset.Demmand, figsize=(25,10), stacked= True )
     
-    y_entries = [test_y, dataset["Demmand"]]
-    y = pandas.concat(y_entries, ignore_index=True)
+    y = dataset["Demmand"]
+    
     
     dataset = dataset.drop("Demmand", 1)
     
     
-    x = pandas.concat([test_set, dataset], ignore_index=True)
+    x = dataset
+    
+    x.index.name = None
+    x= x.reset_index(drop= True)
+    
+    
     x["dt"] = pandas.to_datetime(x["dt"])
     x["day"]= x["dt"].apply(lambda x: int(x.day))
     x["month"] = x["dt"].apply(lambda x: int(x.month))
     
     
+    
+    
+    
+    '''
     x["Treatment Location Name"] = x["Treatment Location Name"].replace("GLASGOW ROYAL INFIRMARY", 1)
     x["Treatment Location Name"] = x["Treatment Location Name"].replace("INVERCLYDE ROYAL HOSPITAL", 2)
     x["Treatment Location Name"] = x["Treatment Location Name"].replace("NEW VICTORIA HOSPITAL", 3)
@@ -190,12 +261,25 @@ def get_data_builder():
     x["Treatment Location Name"] = x["Treatment Location Name"].replace("ROYAL ALEXANDRA HOSPITAL", 5)
     x["Treatment Location Name"] = x["Treatment Location Name"].replace("ROYAL HOSPITAL FOR CHILDREN", 6)
     x["Treatment Location Name"] = x["Treatment Location Name"].replace("STOBHILL HOSPITAL", 7)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("VALE OF LEVEN GENERAL HOSPITAL", 8)
+    x["Treatment Location Name"] = x["Treatment Location Name"].replace("WEST GLASGOW", 9)
     
-    x=  x.drop(["dt", ], 1)
+    '''
+    
+    x= x.drop(["dt"], 1)
+    
+    x = x.astype(int)
+    
+    y= y.astype(int)
+    
+    x= x.drop_duplicates()
     
     
-    return x
     
+    
+    
+    
+
     
     '''
     x["clouds.all"] = processOutliers(x["clouds.all"], x)
@@ -209,15 +293,23 @@ def get_data_builder():
     '''
 
     x= x.replace(np.NaN, 0)
-    X_Train, X_Test, Y_Train, Y_Test = train_test_split(x, y, train_size=0.8, random_state=2)
+    
+   
+    
+    X_Train, X_Test, Y_Train, Y_Test = train_test_split(x, y, train_size=0.9, random_state=2)
+    
+    
+    
     final_train_case_x, final_test_case_x = feature_selec(X_Train, Y_Train, X_Test, x)
     
     set_reference_model(final_train_case_x)
-    return  final_train_case_x, final_test_case_x ,Y_Train, Y_Test
+    
+    eval_x, cv_x, eval_y, cv_y= train_test_split(final_train_case_x, Y_Train, test_size=0.1, random_state=2)
+    
+   
+    return  final_train_case_x, eval_x, final_test_case_x ,Y_Train, eval_y, Y_Test
     
 
 data = get_data_builder()
     
-
-
 
