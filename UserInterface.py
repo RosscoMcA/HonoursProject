@@ -1,4 +1,4 @@
-+
+
 # -*- coding: utf-8 -*-
 """
 Created on Wed Jan 17 17:43:31 2018
@@ -32,6 +32,7 @@ class UserInterface:
 
     def main_page(self):
         root = tk.Tk()
+        root.title("A&E Demand Forecasting")
         frame = tk.Frame(root)
         frame.grid()
         
@@ -43,18 +44,23 @@ class UserInterface:
             self.results = self.get_result_data(value=hospital)
             
             var.set("Displaying estimated demands for "+hospital)
-            tk.Label(frame, textvariable=var).grid(row=0)
-            Tv= tkk.Treeview(frame)
-            Tv["columns"]= ("Date", "Demmand")
+            tk.Label(frame, textvariable=var).grid(row=0, column=0)
+            Tv= tkk.Treeview(frame, columns= ("Date", "Demmand"))
+             
+            
             Tv.heading("Date", text="Date of Prediction")
             Tv.column("Date", width=150)
             Tv.heading("Demmand", text="Potential Demmand Level")
             Tv.column("Demmand", width=200)
             
-            Tv.grid(row=2, sticky=(tk.N, tk.S, tk.E, tk.W))
+            Tv.grid(row=3)
             
+            
+            i= len(self.results)
             for single in self.results:
-                Tv.insert("", "end", text="", values=(single[0], single[1]))
+                
+                Tv.insert("",0, text= i, values=(single[0], single[1]))
+                i=i-1
                 
             
         refresh_section("ROYAL ALEXANDRA HOSPITAL")   
@@ -75,7 +81,7 @@ class UserInterface:
         
         
         btnPredict = tk.Button(frame, text="Submit", command=lambda: refresh_section(hospital=str(self.select_case.get())))
-        btnPredict.grid(row=1, column=1)
+        btnPredict.grid(row=2, column=0)
         root.mainloop()
         
         
